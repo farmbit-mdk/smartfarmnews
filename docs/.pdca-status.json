@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-02T07:05:55.771Z",
+  "lastUpdated": "2026-03-02T11:15:32.489Z",
   "activeFeatures": [
     "config",
     "smartfarmnews",
@@ -9,7 +9,12 @@
     "middleware",
     "routes",
     "admin",
-    "layout"
+    "layout",
+    "frontend",
+    "news",
+    "insights",
+    "market",
+    "events"
   ],
   "primaryFeature": "config",
   "features": {
@@ -116,6 +121,71 @@
         "lastUpdated": "2026-03-02T07:02:49.040Z"
       },
       "lastFile": "/home/leokim/workspace/smartfarmnews/admin/src/components/layout/AdminLayout.jsx"
+    },
+    "frontend": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-02T10:59:21.324Z",
+        "lastUpdated": "2026-03-02T11:06:38.038Z"
+      },
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/app/page.tsx"
+    },
+    "news": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-02T11:12:58.664Z",
+        "lastUpdated": "2026-03-02T11:12:58.664Z"
+      },
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/news/page.tsx"
+    },
+    "insights": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-02T11:13:50.157Z",
+        "lastUpdated": "2026-03-02T11:13:50.157Z"
+      },
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/insights/page.tsx"
+    },
+    "market": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-02T11:14:45.681Z",
+        "lastUpdated": "2026-03-02T11:14:45.681Z"
+      },
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/market/page.tsx"
+    },
+    "events": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-02T11:15:32.489Z",
+        "lastUpdated": "2026-03-02T11:15:32.489Z"
+      },
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/events/page.tsx"
     }
   },
   "pipeline": {
@@ -126,7 +196,7 @@
   "session": {
     "startedAt": "2026-03-02T05:09:32.361Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-02T07:05:55.771Z"
+    "lastActivity": "2026-03-02T11:15:32.489Z"
   },
   "history": [
     {
@@ -360,6 +430,72 @@
     {
       "timestamp": "2026-03-02T07:05:55.771Z",
       "feature": "admin",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T10:59:21.324Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:03:22.043Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:03:35.713Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:03:58.187Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:04:21.308Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:04:42.012Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:06:38.038Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:12:58.664Z",
+      "feature": "news",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:13:50.157Z",
+      "feature": "insights",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:14:45.681Z",
+      "feature": "market",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-02T11:15:32.489Z",
+      "feature": "events",
       "phase": "do",
       "action": "updated"
     }

@@ -18,15 +18,21 @@ CREATE TABLE IF NOT EXISTS news_sources (
 );
 
 INSERT INTO news_sources (name, url, rss_url, category, language) VALUES
-  ('HortiDaily',          'https://www.hortidaily.com',     NULL, 'agtech',      'en'),
-  ('AgFunderNews',         'https://agfundernews.com',       NULL, 'investment',  'en'),
-  ('FreshPlaza',           'https://www.freshplaza.com',     NULL, 'agtech',      'en'),
-  ('AgTechNavigator',      'https://agtechnavigator.com',    NULL, 'agtech',      'en'),
-  ('FoodNavigator',        'https://www.foodnavigator.com',  NULL, 'foodtech',    'en'),
-  ('The Spoon',            'https://thespoon.tech',          NULL, 'foodtech',    'en'),
-  ('DigitalFoodLab',       'https://digitalfoodlab.com',     NULL, 'foodtech',    'en'),
-  ('농민신문',              'https://www.nongmin.com',        NULL, 'domestic',    'ko'),
-  ('농사로(농촌진흥청)',    'https://www.nongsaro.go.kr',     NULL, 'domestic',    'ko')
+  ('HortiDaily',          'https://www.hortidaily.com',          NULL, 'agtech',      'en'),
+  ('AgFunderNews',         'https://agfundernews.com',            NULL, 'investment',  'en'),
+  ('FreshPlaza',           'https://www.freshplaza.com',          NULL, 'agtech',      'en'),
+  ('AgTechNavigator',      'https://agtechnavigator.com',         NULL, 'agtech',      'en'),
+  ('FoodNavigator',        'https://www.foodnavigator.com',       NULL, 'foodtech',    'en'),
+  ('The Spoon',            'https://thespoon.tech',               NULL, 'foodtech',    'en'),
+  ('DigitalFoodLab',       'https://digitalfoodlab.com',          NULL, 'foodtech',    'en'),
+  ('농민신문',              'https://www.nongmin.com',             NULL, 'domestic',    'ko'),
+  ('농사로(농촌진흥청)',    'https://www.nongsaro.go.kr',          NULL, 'domestic',    'ko'),
+  -- v4.0 동남아 소스
+  ('e27',                  'https://e27.co',                      NULL, 'sea',         'en'),
+  ('TechCollective SEA',   'https://techcollectivesea.com',       NULL, 'sea',         'en'),
+  ('GrowAsia',             'https://growasia.org',                NULL, 'sea',         'en'),
+  ('Agro Spectrum Asia',   'https://agrospectrumasia.com',        NULL, 'sea',         'en'),
+  ('농식품부',              'https://www.mafra.go.kr',             NULL, 'domestic',    'ko')
 ON CONFLICT DO NOTHING;
 
 -- ──────────────────────────────────────────────────────────────
@@ -40,17 +46,26 @@ CREATE TABLE IF NOT EXISTS articles (
   title_en        VARCHAR(500),
   content_ko      TEXT,
   content_en      TEXT,
-  summary         TEXT,                 -- AI 3줄 요약 (• 줄1\n• 줄2\n• 줄3)
-  commentary      TEXT,                 -- 에디터 논평 (1~2문장)
+  summary         TEXT,                 -- AI 3줄 요약 KO (• 줄1\n• 줄2\n• 줄3) — 하위 호환 유지
+  summary_ko      TEXT,                 -- v4.0 KO 명시 요약
+  summary_en      TEXT,                 -- v4.0 EN 요약
+  commentary      TEXT,                 -- 에디터 논평 KO (1~2문장)
+  commentary_en   TEXT,                 -- v4.0 EN 논평
   original_url    VARCHAR(1000) UNIQUE,
   source_name     VARCHAR(100),
   menu_type       VARCHAR(20)  NOT NULL CHECK (menu_type IN ('news', 'insights')),
   tags            TEXT[]       DEFAULT '{}',
-  seo_title       VARCHAR(100),         -- Insights용 SEO 제목
-  seo_description VARCHAR(200),         -- Insights용 SEO 설명
+  region          VARCHAR(50),          -- v4.0 global | sea | vietnam | indonesia | thailand
+  is_k_agtech     BOOLEAN      DEFAULT false,  -- v4.0 K-AgTech 태그
+  seo_title       VARCHAR(100),         -- KO SEO 제목
+  seo_description VARCHAR(200),         -- KO SEO 설명
+  seo_title_en    VARCHAR(160),         -- v4.0 EN SEO 제목
+  seo_desc_en     VARCHAR(320),         -- v4.0 EN SEO 설명
   status          VARCHAR(20)  DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
   published_at    TIMESTAMP,
   view_count      INTEGER      DEFAULT 0,
+  view_count_ko   INTEGER      DEFAULT 0,  -- v4.0 KO 독자 조회수
+  view_count_en   INTEGER      DEFAULT 0,  -- v4.0 EN 독자 조회수
   created_at      TIMESTAMP    DEFAULT NOW(),
   updated_at      TIMESTAMP    DEFAULT NOW()
 );
@@ -188,6 +203,7 @@ CREATE TABLE IF NOT EXISTS events (
   location        VARCHAR(300),
   country         VARCHAR(100),
   type            VARCHAR(20)  DEFAULT 'global' CHECK (type IN ('global', 'korea')),
+  region          VARCHAR(100),         -- v4.0 sea | europe | usa | korea
   start_date      DATE,
   end_date        DATE,
   website         VARCHAR(500),

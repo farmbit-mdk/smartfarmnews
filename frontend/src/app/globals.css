@@ -1,0 +1,89 @@
+/* Pretendard — 가변 폰트 (CDN) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/* Inter — 가변 폰트 (Google Fonts) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── 다크 테마 기본 ────────────────────────────────────────── */
+:root {
+  --background:     #1A1A1A;
+  --surface:        #242424;
+  --border:         #333333;
+  --text-primary:   #FFFFFF;
+  --text-secondary: #9E9E9E;
+  --accent-teal:    #0891B2;
+  --accent-cyan:    #22D3EE;
+  --accent-green:   #4ADE80;
+  --accent-amber:   #F59E0B;
+}
+
+/* ── 기본 리셋 ─────────────────────────────────────────────── */
+@layer base {
+  html {
+    font-family: "Pretendard Variable", "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* 스크롤바 — 다크 테마 */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+  }
+}
+
+/* ── 유틸리티 ─────────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-surface {
+    background-color: var(--surface);
+  }
+
+  .border-sfn {
+    border-color: var(--border);
+  }
+
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+}
