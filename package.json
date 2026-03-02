@@ -1,0 +1,41 @@
+{
+  "name": "smartfarmnews",
+  "version": "0.1.0",
+  "description": "SmartFarmNews.com — AgTech/FoodTech media + used farm equipment marketplace",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "pm2:start": "pm2 start pm2.config.js",
+    "pm2:reload": "pm2 reload pm2.config.js",
+    "db:migrate": "node src/db/migrate.js",
+    "db:schema": "psql -U $DB_USER -d $DB_NAME -f src/db/schema.sql"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "nodemailer": "^8.0.1",
+    "openai": "^4.47.1",
+    "pg": "^8.11.5",
+    "playwright": "^1.44.0",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.2"
+  },
+  "nodemonConfig": {
+    "ignore": ["admin/", "frontend/", "docs/"],
+    "ext": "js,json"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
