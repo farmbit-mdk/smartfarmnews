@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-03T10:32:00.650Z",
+  "lastUpdated": "2026-03-03T11:20:21.852Z",
   "activeFeatures": [
     "config",
     "smartfarmnews",
@@ -14,7 +14,8 @@
     "news",
     "insights",
     "market",
-    "events"
+    "events",
+    "[slug]"
   ],
   "primaryFeature": "config",
   "features": {
@@ -131,9 +132,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T10:59:21.324Z",
-        "lastUpdated": "2026-03-03T10:32:00.650Z"
+        "lastUpdated": "2026-03-03T10:46:45.668Z"
       },
-      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/page.tsx"
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/lib/mockData.ts"
     },
     "news": {
       "phase": "do",
@@ -144,7 +145,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T11:12:58.664Z",
-        "lastUpdated": "2026-03-02T11:12:58.664Z"
+        "lastUpdated": "2026-03-03T10:49:29.964Z"
       },
       "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/news/page.tsx"
     },
@@ -186,6 +187,19 @@
         "lastUpdated": "2026-03-02T11:15:32.489Z"
       },
       "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/events/page.tsx"
+    },
+    "[slug]": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-03T11:20:21.852Z",
+        "lastUpdated": "2026-03-03T11:20:21.852Z"
+      },
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/news/[slug]/page.tsx"
     }
   },
   "pipeline": {
@@ -196,7 +210,7 @@
   "session": {
     "startedAt": "2026-03-02T05:09:32.361Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-03T10:32:00.650Z"
+    "lastActivity": "2026-03-03T11:20:21.852Z"
   },
   "history": [
     {
@@ -538,6 +552,24 @@
     {
       "timestamp": "2026-03-03T10:32:00.650Z",
       "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T10:46:45.668Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T10:49:29.964Z",
+      "feature": "news",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T11:20:21.852Z",
+      "feature": "[slug]",
       "phase": "do",
       "action": "updated"
     }
