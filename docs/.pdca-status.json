@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-03T11:20:21.852Z",
+  "lastUpdated": "2026-03-03T14:40:58.226Z",
   "activeFeatures": [
     "config",
     "smartfarmnews",
@@ -28,9 +28,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T05:16:20.196Z",
-        "lastUpdated": "2026-03-02T05:16:30.867Z"
+        "lastUpdated": "2026-03-03T12:49:41.484Z"
       },
-      "lastFile": "/home/leokim/workspace/smartfarmnews/src/config/database.js"
+      "lastFile": "/home/leokim/workspace/smartfarmnews/src/config/env.js"
     },
     "smartfarmnews": {
       "phase": "do",
@@ -41,9 +41,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T05:22:06.270Z",
-        "lastUpdated": "2026-03-02T06:10:55.356Z"
+        "lastUpdated": "2026-03-03T14:37:28.746Z"
       },
-      "lastFile": "/home/leokim/workspace/smartfarmnews/pm2.config.js"
+      "lastFile": "/home/leokim/workspace/smartfarmnews/src/utils/qwenPrompts.js"
     },
     "agents": {
       "phase": "do",
@@ -54,9 +54,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T05:52:34.599Z",
-        "lastUpdated": "2026-03-02T06:19:43.509Z"
+        "lastUpdated": "2026-03-03T14:40:58.226Z"
       },
-      "lastFile": "/home/leokim/workspace/smartfarmnews/src/agents/orchestrator.js"
+      "lastFile": "/home/leokim/workspace/smartfarmnews/src/agents/newsAgent.js"
     },
     "api": {
       "phase": "do",
@@ -93,9 +93,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T05:59:32.308Z",
-        "lastUpdated": "2026-03-02T06:04:06.638Z"
+        "lastUpdated": "2026-03-03T12:08:18.497Z"
       },
-      "lastFile": "/home/leokim/workspace/smartfarmnews/src/api/routes/subscribers.js"
+      "lastFile": "/home/leokim/workspace/smartfarmnews/src/api/routes/articles.js"
     },
     "admin": {
       "phase": "do",
@@ -132,9 +132,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T10:59:21.324Z",
-        "lastUpdated": "2026-03-03T10:46:45.668Z"
+        "lastUpdated": "2026-03-03T12:08:30.650Z"
       },
-      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/lib/mockData.ts"
+      "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/lib/api.ts"
     },
     "news": {
       "phase": "do",
@@ -145,7 +145,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-02T11:12:58.664Z",
-        "lastUpdated": "2026-03-03T10:49:29.964Z"
+        "lastUpdated": "2026-03-03T11:51:32.511Z"
       },
       "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/news/page.tsx"
     },
@@ -197,7 +197,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-03T11:20:21.852Z",
-        "lastUpdated": "2026-03-03T11:20:21.852Z"
+        "lastUpdated": "2026-03-03T11:54:11.333Z"
       },
       "lastFile": "/home/leokim/workspace/smartfarmnews/frontend/src/app/news/[slug]/page.tsx"
     }
@@ -210,7 +210,7 @@
   "session": {
     "startedAt": "2026-03-02T05:09:32.361Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-03T11:20:21.852Z"
+    "lastActivity": "2026-03-03T14:40:58.226Z"
   },
   "history": [
     {
@@ -570,6 +570,276 @@
     {
       "timestamp": "2026-03-03T11:20:21.852Z",
       "feature": "[slug]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T11:45:16.911Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T11:48:31.636Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T11:51:32.511Z",
+      "feature": "news",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T11:54:11.333Z",
+      "feature": "[slug]",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:08:04.205Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:08:11.017Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:08:18.498Z",
+      "feature": "routes",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:08:30.650Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:39:42.509Z",
+      "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:39:54.824Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:40:04.355Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:40:17.224Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:43:51.004Z",
+      "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:43:57.054Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:44:01.649Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:49:41.484Z",
+      "feature": "config",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:49:45.684Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T12:49:49.897Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:34:55.632Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:35:06.934Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:35:15.047Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:44:06.999Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:52:04.964Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:53:32.666Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:53:51.369Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T13:54:49.525Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:02:53.983Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:03:05.954Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:03:14.949Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:03:29.834Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:03:38.050Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:10:31.933Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:10:45.589Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:11:02.968Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:11:11.024Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:24:03.977Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:25:02.231Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:25:42.927Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:25:48.485Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:25:54.942Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:36:31.065Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:36:37.391Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:37:16.276Z",
+      "feature": "agents",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:37:28.746Z",
+      "feature": "smartfarmnews",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-03T14:40:58.226Z",
+      "feature": "agents",
       "phase": "do",
       "action": "updated"
     }
