@@ -1,78 +1,18 @@
 import ArticleCard from '@/src/components/ArticleCard';
 import Link from 'next/link';
+import { fetchArticles } from '@/src/lib/api';
+import { MOCK_ARTICLES } from '@/src/lib/mockData';
 
-// ── Mock 데이터 (API 연결 전 임시) ────────────────────────────────
-const FEATURED_ARTICLE = {
-  id: 1,
-  title: '아시아 스마트팜 시장, 2030년까지 연 12% 성장 전망',
-  excerpt:
-    'GrowAsia 보고서에 따르면 동남아시아 정밀농업 투자가 급증하며 베트남·인도네시아·태국이 핵심 성장 거점으로 부상하고 있다.',
-  category: 'AgTech',
-  region: 'sea',
-  date: '2026-03-02',
-  slug: 'asia-smartfarm-market-2030',
+const SEA_REGIONS = ['sea', 'vietnam', 'indonesia', 'thailand'];
+
+const REGION_STYLE: Record<string, { label: string; color: string }> = {
+  sea:       { label: 'SEA',    color: '#22D3EE' },
+  vietnam:   { label: 'VN',     color: '#22D3EE' },
+  indonesia: { label: 'ID',     color: '#22D3EE' },
+  thailand:  { label: 'TH',     color: '#22D3EE' },
+  korea:     { label: 'KR',     color: '#4ADE80' },
+  global:    { label: 'Global', color: '#9E9E9E' },
 };
-
-const NEWS_ARTICLES = [
-  {
-    id: 2,
-    title: 'K-AgTech 스타트업, 동남아 3개국 동시 진출 성공',
-    excerpt: '국내 스마트팜 솔루션 기업 그린랩스가 베트남·태국·인도네시아 시장에 통합 플랫폼을 론칭했다.',
-    category: 'K-AgTech',
-    region: 'korea',
-    date: '2026-03-02',
-    slug: 'k-agtech-sea-expansion',
-  },
-  {
-    id: 3,
-    title: 'e27 리포트: SEA 애그리테크 스타트업 펀딩 현황',
-    excerpt: '2025년 동남아 농업기술 스타트업에 유입된 VC 투자액이 전년 대비 34% 증가했다.',
-    category: 'investment',
-    region: 'sea',
-    date: '2026-03-01',
-    slug: 'sea-agtech-funding-2025',
-  },
-  {
-    id: 4,
-    title: '수직농장 기술, 중동·동남아 확산 가속화',
-    excerpt: '에너지 효율 개선과 LED 비용 하락으로 도시 수직농장의 수익성이 개선되며 글로벌 확장세가 이어진다.',
-    category: 'FoodTech',
-    region: 'global',
-    date: '2026-03-01',
-    slug: 'vertical-farm-mena-sea',
-  },
-  {
-    id: 5,
-    title: '농식품부, K-AgTech 글로벌화 지원 100억 추가 편성',
-    excerpt: '정부가 스마트팜 수출 컨소시엄 구성을 위한 예산을 확대하고 현지화 R&D 지원을 강화한다.',
-    category: '정책',
-    region: 'korea',
-    date: '2026-02-28',
-    slug: 'mafra-agtech-global-support',
-  },
-  {
-    id: 6,
-    title: 'GrowAsia 2026 서밋: ASEAN 농업 혁신 로드맵 공개',
-    excerpt: 'ASEAN 농업장관 회의에서 디지털 전환과 청년 농업인 육성 중심의 5개년 계획이 제시됐다.',
-    category: 'AgTech',
-    region: 'sea',
-    date: '2026-02-27',
-    slug: 'growasia-2026-summit',
-  },
-  {
-    id: 7,
-    title: '인도네시아 팜 오일 AI 모니터링 도입 확대',
-    excerpt: '위성·드론 데이터를 결합한 지속가능성 추적 플랫폼이 수마트라 농장 3만 헥타르에 적용된다.',
-    category: 'AgTech',
-    region: 'indonesia',
-    date: '2026-02-26',
-    slug: 'indonesia-palm-ai-monitoring',
-  },
-];
-
-const SEA_ARTICLES = NEWS_ARTICLES.filter((a) =>
-  ['sea', 'vietnam', 'indonesia', 'thailand'].includes(a.region ?? ''),
-);
 
 // ── 섹션 헤더 컴포넌트 ────────────────────────────────────────────
 function SectionHeader({ title, href, badge }: { title: string; href?: string; badge?: string }) {
@@ -102,7 +42,17 @@ function SectionHeader({ title, href, badge }: { title: string; href?: string; b
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  // API fetch → 실패/오프라인이면 빈 배열 반환
+  const apiArticles = await fetchArticles({ menu_type: 'news', limit: 20 });
+  const articles    = apiArticles.length > 0 ? apiArticles : MOCK_ARTICLES;
+
+  const featured     = articles[0];
+  const newsArticles = articles.slice(0, 6);
+  const seaArticles  = articles.filter((a) => SEA_REGIONS.includes(a.region)).slice(0, 4);
+
+  const featuredRegionStyle = REGION_STYLE[featured.region] ?? { label: featured.region.toUpperCase(), color: '#9E9E9E' };
+
   return (
     <div style={{ backgroundColor: '#1A1A1A' }}>
 
@@ -111,13 +61,10 @@ export default function HomePage() {
         className="relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1A1A1A 0%, #1E3040 50%, #1A1A1A 100%)' }}
       >
-        {/* 배경 데코: Teal 라이트 */}
+        {/* 배경 데코 */}
         <div
           className="absolute inset-0 opacity-30 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse 60% 50% at 70% 50%, #0891B222 0%, transparent 70%)',
-          }}
+          style={{ background: 'radial-gradient(ellipse 60% 50% at 70% 50%, #0891B222 0%, transparent 70%)' }}
         />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
@@ -174,23 +121,27 @@ export default function HomePage() {
                     className="px-2 py-0.5 rounded text-xs font-semibold"
                     style={{ backgroundColor: '#0891B2', color: '#FFF' }}
                   >
-                    {FEATURED_ARTICLE.category}
+                    {featured.category}
                   </span>
                   <span
                     className="px-2 py-0.5 rounded text-xs font-semibold"
-                    style={{ backgroundColor: '#22D3EE22', color: '#22D3EE', border: '1px solid #22D3EE55' }}
+                    style={{
+                      backgroundColor: `${featuredRegionStyle.color}22`,
+                      color: featuredRegionStyle.color,
+                      border: `1px solid ${featuredRegionStyle.color}55`,
+                    }}
                   >
-                    SEA
+                    {featuredRegionStyle.label}
                   </span>
                 </div>
                 <h2 className="text-lg font-bold leading-snug text-white">
-                  {FEATURED_ARTICLE.title}
+                  {featured.title}
                 </h2>
                 <p className="text-sm leading-relaxed" style={{ color: '#9E9E9E' }}>
-                  {FEATURED_ARTICLE.excerpt}
+                  {featured.excerpt}
                 </p>
                 <Link
-                  href={`/news/${FEATURED_ARTICLE.slug}`}
+                  href={`/news/${featured.slug}`}
                   className="inline-flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80"
                   style={{ color: '#22D3EE' }}
                 >
@@ -204,9 +155,9 @@ export default function HomePage() {
               {/* 플랫폼 통계 요약 */}
               <div className="grid grid-cols-3 gap-3 mt-4">
                 {[
-                  { value: '30+',   label: '일일 뉴스'  },
-                  { value: '4',     label: '지역 언어'  },
-                  { value: '$0.50', label: '월 AI비용'  },
+                  { value: '30+',   label: '일일 뉴스' },
+                  { value: '4',     label: '지역 언어' },
+                  { value: '$0.50', label: '월 AI비용' },
                 ].map(({ value, label }) => (
                   <div
                     key={label}
@@ -227,12 +178,8 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
         <SectionHeader title="최신 뉴스" href="/news" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {NEWS_ARTICLES.map((article) => (
-            <ArticleCard
-              key={article.id}
-              {...article}
-              lang="ko"
-            />
+          {newsArticles.map((article) => (
+            <ArticleCard key={article.id} {...article} lang="ko" />
           ))}
         </div>
       </section>
@@ -244,20 +191,24 @@ export default function HomePage() {
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader title="동남아 포커스" href="/news?region=sea" badge="SEA" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '20px',
-              alignItems: 'start',
-            }}
-          >
-            {SEA_ARTICLES.slice(0, 4).map((article) => (
-              <div key={article.id} style={{ minWidth: 0 }}>
-                <ArticleCard {...article} lang="ko" />
-              </div>
-            ))}
-          </div>
+          {seaArticles.length > 0 ? (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '20px',
+                alignItems: 'start',
+              }}
+            >
+              {seaArticles.map((article) => (
+                <div key={article.id} style={{ minWidth: 0 }}>
+                  <ArticleCard {...article} lang="ko" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm" style={{ color: '#9E9E9E' }}>동남아 기사를 불러오는 중입니다.</p>
+          )}
         </div>
       </section>
 
@@ -265,15 +216,9 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
         <div
           className="rounded-2xl px-8 py-12 text-center"
-          style={{
-            background: 'linear-gradient(135deg, #1E3040 0%, #242424 100%)',
-            border: '1px solid #0891B255',
-          }}
+          style={{ background: 'linear-gradient(135deg, #1E3040 0%, #242424 100%)', border: '1px solid #0891B255' }}
         >
-          <p
-            className="text-xs font-semibold uppercase tracking-widest mb-3"
-            style={{ color: '#0891B2' }}
-          >
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#0891B2' }}>
             Newsletter
           </p>
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
@@ -288,11 +233,7 @@ export default function HomePage() {
               type="email"
               placeholder="이메일 주소 입력"
               className="w-full sm:flex-1 rounded-full px-4 py-2.5 text-sm outline-none"
-              style={{
-                backgroundColor: '#1A1A1A',
-                border: '1px solid #333333',
-                color: '#FFFFFF',
-              }}
+              style={{ backgroundColor: '#1A1A1A', border: '1px solid #333333', color: '#FFFFFF' }}
             />
             <Link
               href="/subscribe"

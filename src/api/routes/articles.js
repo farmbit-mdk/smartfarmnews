@@ -1,9 +1,10 @@
 /**
  * Public Articles API
- * GET  /api/articles          목록 (menu_type, tag, search, sort, page, limit)
- * GET  /api/articles/:id      상세
- * GET  /api/articles/:id/related  관련 기사
- * POST /api/articles/:id/view 조회수 증가
+ * GET  /api/articles               목록 (menu_type, tag, search, sort, page, limit)
+ * GET  /api/articles/slug/:slug    slug 기반 단건 조회
+ * GET  /api/articles/:id           ID 기반 단건 조회
+ * GET  /api/articles/:id/related   관련 기사
+ * POST /api/articles/:id/view      조회수 증가
  */
 
 import { Router } from 'express';
@@ -47,7 +48,8 @@ router.get('/', async (req, res, next) => {
 
     const { rows } = await query(
       `SELECT id, slug, title_ko, title_en, summary, tags, source_name,
-              menu_type, published_at, view_count
+              menu_type, region, is_k_agtech,
+              published_at, view_count, view_count_ko, view_count_en
        FROM   articles
        WHERE  ${where}
        ORDER  BY ${order}
@@ -66,7 +68,22 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// ── 단건 조회 ─────────────────────────────────────────────────────
+// ── slug 기반 단건 조회 ───────────────────────────────────────────
+// NOTE: /:id 보다 먼저 등록해야 Express 라우트 매칭 충돌 없음
+router.get('/slug/:slug', async (req, res, next) => {
+  try {
+    const { rows } = await query(
+      `SELECT * FROM articles WHERE slug = $1 AND status = 'published'`,
+      [req.params.slug],
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not Found' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── ID 기반 단건 조회 ─────────────────────────────────────────────
 router.get('/:id', async (req, res, next) => {
   try {
     const { rows } = await query(

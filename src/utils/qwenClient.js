@@ -25,15 +25,16 @@ const openRouter = new OpenAI({
 
 // ── 모델 상수 ──────────────────────────────────────────────────────
 export const QWEN_MODELS = {
-  FREE:   config.QWEN_MODEL_FREE,    // 번역·요약·분류·파싱 (무료, 일 1,000req)
-  PRO:    config.QWEN_MODEL_PRO,     // 논평·다국어 번역·SEO·설명 ($0.13/$0.39 per MTok)
-  REASON: config.QWEN_MODEL_REASON,  // 인사이트 기사·심층 분석 (무료)
-  CODER:  config.QWEN_MODEL_CODER,   // 개발 시에만 사용
+  FREE:         config.QWEN_MODEL_FREE,    // 번역·요약·분류·파싱 (현재: qwen-2.5-7b-instruct)
+  PRO:          config.QWEN_MODEL_PRO,     // 논평·다국어 번역·SEO·설명 (현재: qwen-2.5-7b-instruct)
+  REASON:       config.QWEN_MODEL_REASON,  // 인사이트 기사·심층 분석 (현재: qwen-2.5-7b-instruct)
+  CODER:        config.QWEN_MODEL_CODER,   // 개발 시에만 사용 (현재: qwen-2.5-7b-instruct)
+  GEMINI_FLASH: 'google/gemini-2.5-flash', // 심층 분석 아티클 생성
 };
 
 // ── 작업 → 모델 매핑 ────────────────────────────────────────────────
 const TASK_MODEL_MAP = {
-  // Free (Qwen-7B, 무료)
+  // Free tier
   translate_ko:   QWEN_MODELS.FREE,
   summarize:      QWEN_MODELS.FREE,
   classify:       QWEN_MODELS.FREE,
@@ -42,7 +43,8 @@ const TASK_MODEL_MAP = {
   parse_auction:  QWEN_MODELS.FREE,
   event_summary:  QWEN_MODELS.FREE,
 
-  // Pro (Qwen-72B, 유료)
+  // Pro tier (현재 FREE 모델과 동일 — 고품질 모델로 교체 시 .env만 수정)
+  analyze_ko:     QWEN_MODELS.GEMINI_FLASH,  // 심층 분석 아티클 — Gemini 2.5 Flash
   commentary:     QWEN_MODELS.PRO,
   translate_zh:   QWEN_MODELS.PRO,
   translate_vi:   QWEN_MODELS.PRO,
@@ -50,7 +52,7 @@ const TASK_MODEL_MAP = {
   seo_meta:       QWEN_MODELS.PRO,
   description_gen: QWEN_MODELS.PRO,
 
-  // Reason (Qwen3-235B, 무료)
+  // Reason tier (현재 FREE 모델과 동일 — 심층 분석용 모델로 교체 시 .env만 수정)
   insight_article: QWEN_MODELS.REASON,
   deep_analysis:   QWEN_MODELS.REASON,
   paper_insight:   QWEN_MODELS.REASON,
@@ -58,7 +60,8 @@ const TASK_MODEL_MAP = {
 
 // ── 작업별 토큰·temperature 설정 ────────────────────────────────────
 const TASK_CONFIG = {
-  translate_ko:    { maxTokens: 600,  temperature: 0.1 },
+  translate_ko:    { maxTokens: 300,  temperature: 0.1 },
+  analyze_ko:      { maxTokens: 1200, temperature: 0.3 },
   summarize:       { maxTokens: 200,  temperature: 0.2 },
   classify:        { maxTokens: 50,   temperature: 0.0 },
   tag_extract:     { maxTokens: 60,   temperature: 0.0 },

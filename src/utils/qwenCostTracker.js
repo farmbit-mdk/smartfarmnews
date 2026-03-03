@@ -9,6 +9,10 @@ import { config } from '../config/env.js';
 
 // ── 모델별 요금표 (단위: $/1K tokens) ─────────────────────────────
 const PRICING = {
+  // 현재 사용 모델
+  'qwen/qwen-2.5-7b-instruct': { in: 0, out: 0 },
+
+  // 이전 모델 (agent_logs 히스토리 비용 계산용)
   'qwen/qwen-2.5-7b-instruct:free':   { in: 0,         out: 0         },
   'qwen/qwen-2.5-72b-instruct':        { in: 0.000130,  out: 0.000390  },
   'qwen/qwen3-235b-a22b:free':         { in: 0,         out: 0         },

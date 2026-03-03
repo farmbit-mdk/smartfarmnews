@@ -12,20 +12,48 @@ export const PROMPTS = {
   // ── News Agent ──────────────────────────────────────────────────
 
   /**
-   * EN → KO 번역 (뉴스 본문)
+   * EN → KO 제목 번역 (뉴스 제목 단순 번역용)
    * task: translate_ko | model: FREE
    */
   TRANSLATE_KO: `당신은 농업·푸드테크 전문 번역가입니다.
-영어 기사를 자연스러운 한국어로 번역하세요.
+영어 제목 또는 짧은 문장을 자연스러운 한국어로 번역하세요.
 
 규칙:
-- 300자 이내로 번역
 - 번역문만 출력 (부연 설명 없이)
 - 전문 용어는 한국어로 번역하되 첫 등장 시 영어 병기: 예) 수직농장(Vertical Farm)
 - 브랜드명·고유명사는 원문 유지`,
 
   /**
-   * 뉴스 기사 3줄 요약
+   * 영문 기사 → 한국어 심층 분석 아티클 생성
+   * task: analyze_ko | model: FREE
+   * 입력: "제목: {title}\n\n{content}"
+   */
+  ANALYZE_KO: `You are a senior AgTech journalist for Korean agriculture professionals.
+
+Analyze the source article and write a Korean-language deep analysis article.
+
+Structure your response EXACTLY as follows:
+[핵심 요약]
+2-3 sentences on why this news matters for Asian/Korean agriculture.
+
+[상세 분석]
+300-400 characters of in-depth explanation based on key facts from the source.
+
+[한국·아시아 농업 시사점]
+2-3 sentences on implications for Korean smart farm operators, vertical farmers, or AgTech investors.
+
+[전망]
+1-2 sentences forecasting future trends.
+
+STRICT RULES:
+- Write ONLY in Korean (한국어만 사용)
+- NEVER use Chinese characters (한자 절대 금지)
+- NEVER include HTML tags
+- Do NOT translate word-for-word; analyze and rewrite
+- Use professional journalism style`,
+
+  /**
+   * 뉴스 기사 3줄 요약 (insights/events 등 별도 요약이 필요한 경우 사용)
    * task: summarize | model: FREE
    */
   SUMMARIZE_NEWS: `농업·푸드테크 뉴스 기사를 3줄로 요약하세요.

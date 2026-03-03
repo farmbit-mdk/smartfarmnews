@@ -25,12 +25,12 @@ export const config = {
   DB_USER: process.env.DB_USER,
   DB_PASSWORD: process.env.DB_PASSWORD,
 
-  // OpenRouter / Qwen
+  // OpenRouter
   OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-  QWEN_MODEL_FREE:   process.env.QWEN_MODEL_FREE   ?? 'qwen/qwen-2.5-7b-instruct:free',
-  QWEN_MODEL_PRO:    process.env.QWEN_MODEL_PRO    ?? 'qwen/qwen-2.5-72b-instruct',
-  QWEN_MODEL_REASON: process.env.QWEN_MODEL_REASON ?? 'qwen/qwen3-235b-a22b:free',
-  QWEN_MODEL_CODER:  process.env.QWEN_MODEL_CODER  ?? 'qwen/qwen-2.5-coder-32b-instruct',
+  QWEN_MODEL_FREE:   process.env.QWEN_MODEL_FREE   ?? 'qwen/qwen-2.5-7b-instruct',
+  QWEN_MODEL_PRO:    process.env.QWEN_MODEL_PRO    ?? 'qwen/qwen-2.5-7b-instruct',
+  QWEN_MODEL_REASON: process.env.QWEN_MODEL_REASON ?? 'qwen/qwen-2.5-7b-instruct',
+  QWEN_MODEL_CODER:  process.env.QWEN_MODEL_CODER  ?? 'qwen/qwen-2.5-7b-instruct',
 
   // Rate limit
   QWEN_FREE_DELAY_MS:    parseInt(process.env.QWEN_FREE_DELAY_MS    ?? '3000', 10),

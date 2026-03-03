@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { MOCK_ARTICLES, Article } from '@/src/lib/mockData';
+import { fetchArticle, fetchArticles } from '@/src/lib/api';
 import ArticleCard from '@/src/components/ArticleCard';
 
 // ── 지역 스타일 ────────────────────────────────────────────────────
@@ -20,7 +21,6 @@ function formatDate(dateStr: string): string {
   });
 }
 
-// ── placeholder 본문 생성 ─────────────────────────────────────────
 function buildBodyParagraphs(article: Article): string[] {
   return [
     article.excerpt,
@@ -31,8 +31,14 @@ function buildBodyParagraphs(article: Article): string[] {
 }
 
 // ── generateStaticParams ──────────────────────────────────────────
-export function generateStaticParams() {
-  return MOCK_ARTICLES.map((a) => ({ slug: a.slug }));
+// 빌드 타임에 API + mock slug를 합쳐 정적 페이지 생성
+export async function generateStaticParams() {
+  const apiArticles = await fetchArticles({ limit: 100 });
+  const allSlugs = new Set([
+    ...apiArticles.map((a) => a.slug),
+    ...MOCK_ARTICLES.map((a) => a.slug),
+  ]);
+  return Array.from(allSlugs).map((slug) => ({ slug }));
 }
 
 // ── generateMetadata ──────────────────────────────────────────────
@@ -42,12 +48,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = MOCK_ARTICLES.find((a) => a.slug === slug);
+  const article =
+    (await fetchArticle(slug)) ?? MOCK_ARTICLES.find((a) => a.slug === slug);
+
   if (!article) {
     return { title: '기사를 찾을 수 없습니다 | SmartFarmNews' };
   }
   return {
-    title: `${article.title} | SmartFarmNews`,
+    title:       `${article.title} | SmartFarmNews`,
     description: article.excerpt,
   };
 }
@@ -59,19 +67,29 @@ export default async function NewsDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const index = MOCK_ARTICLES.findIndex((a) => a.slug === slug);
-  if (index === -1) notFound();
 
-  const article = MOCK_ARTICLES[index];
-  const prevArticle = index > 0 ? MOCK_ARTICLES[index - 1] : null;
-  const nextArticle = index < MOCK_ARTICLES.length - 1 ? MOCK_ARTICLES[index + 1] : null;
+  // 1. API에서 단건 조회, 실패 시 mock fallback
+  const apiArticle = await fetchArticle(slug);
+  const article    = apiArticle ?? MOCK_ARTICLES.find((a) => a.slug === slug) ?? null;
+  if (!article) notFound();
 
-  const related = MOCK_ARTICLES
-    .filter((a) => a.slug !== slug && a.category === article.category)
+  // 2. 이전/다음/관련 기사 목록 (API 우선, 실패 시 mock)
+  const apiList = await fetchArticles({ limit: 100 });
+  const source  = apiList.length > 0 ? apiList : MOCK_ARTICLES;
+
+  const index      = source.findIndex((a) => a.slug === slug);
+  const prevArticle = index > 0                  ? source[index - 1] : null;
+  const nextArticle = index < source.length - 1  ? source[index + 1] : null;
+
+  const related = source
+    .filter((a) => a.slug !== slug && a.category === article!.category)
     .slice(0, 3);
 
-  const paragraphs = buildBodyParagraphs(article);
-  const regionStyle = REGION_STYLE[article.region] ?? { label: article.region.toUpperCase(), color: '#9E9E9E' };
+  const paragraphs  = buildBodyParagraphs(article!);
+  const regionStyle = REGION_STYLE[article!.region] ?? {
+    label: article!.region.toUpperCase(),
+    color: '#9E9E9E',
+  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#1A1A1A' }}>
@@ -103,26 +121,26 @@ export default async function NewsDetailPage({
                 className="px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wide"
                 style={{ backgroundColor: '#0891B2', color: '#FFFFFF' }}
               >
-                {article.category}
+                {article!.category}
               </span>
               <span
                 className="px-2.5 py-1 rounded text-xs font-semibold"
                 style={{
                   backgroundColor: `${regionStyle.color}22`,
-                  color: regionStyle.color,
-                  border: `1px solid ${regionStyle.color}55`,
+                  color:            regionStyle.color,
+                  border:          `1px solid ${regionStyle.color}55`,
                 }}
               >
                 {regionStyle.label}
               </span>
               <span className="text-xs ml-auto" style={{ color: '#9E9E9E' }}>
-                {formatDate(article.date)}
+                {formatDate(article!.date)}
               </span>
             </div>
 
             {/* 제목 */}
             <h1 className="text-3xl font-bold text-white leading-snug mb-8">
-              {article.title}
+              {article!.title}
             </h1>
 
             {/* 구분선 */}
@@ -186,7 +204,10 @@ export default async function NewsDetailPage({
               className="sticky top-8 rounded-xl p-5"
               style={{ backgroundColor: '#242424', border: '1px solid #333333' }}
             >
-              <h2 className="text-sm font-semibold text-white mb-4 pb-3" style={{ borderBottom: '1px solid #333333' }}>
+              <h2
+                className="text-sm font-semibold text-white mb-4 pb-3"
+                style={{ borderBottom: '1px solid #333333' }}
+              >
                 관련 기사
               </h2>
 

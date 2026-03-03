@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ArticleCard from '@/src/components/ArticleCard';
-import { MOCK_ARTICLES } from '@/src/lib/mockData';
+import { MOCK_ARTICLES, Article } from '@/src/lib/mockData';
+import { fetchArticles } from '@/src/lib/api';
 
-const ALL_ARTICLES = MOCK_ARTICLES;
+const ALL_MOCK = MOCK_ARTICLES;
 
 type RegionFilter = 'all' | 'korea' | 'sea' | 'global';
 
@@ -26,12 +27,20 @@ function matchRegion(articleRegion: string | undefined, filter: RegionFilter): b
 const PAGE_SIZE = 9;
 
 export default function NewsPage() {
+  const [articles, setArticles]       = useState<Article[]>(ALL_MOCK);
   const [activeRegion, setActiveRegion] = useState<RegionFilter>('all');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = ALL_ARTICLES.filter((a) => matchRegion(a.region, activeRegion));
+  // 마운트 후 API에서 fetch, 성공 시 mock 대체
+  useEffect(() => {
+    fetchArticles({ menu_type: 'news', limit: 50 }).then((data) => {
+      if (data.length > 0) setArticles(data);
+    });
+  }, []);
+
+  const filtered   = articles.filter((a) => matchRegion(a.region, activeRegion));
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paged = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const paged      = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function handleRegionChange(region: RegionFilter) {
     setActiveRegion(region);
@@ -67,7 +76,7 @@ export default function NewsPage() {
             >
               {label}
               <span className="ml-2 text-xs opacity-70">
-                ({ALL_ARTICLES.filter((a) => matchRegion(a.region, key)).length})
+                ({articles.filter((a) => matchRegion(a.region, key)).length})
               </span>
             </button>
           ))}

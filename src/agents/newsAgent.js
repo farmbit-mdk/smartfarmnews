@@ -29,6 +29,18 @@ const AGENT_NAME = 'news';
 /** RSS content 가 이 길이 미만이면 Playwright 크롤링 */
 const MIN_CONTENT_LENGTH = 200;
 
+/** 수집 대상 최대 기사 나이 (72시간) */
+const MAX_AGE_MS = 72 * 60 * 60 * 1000;
+
+/** AgTech 관련 키워드 — 영문 소스 필터용 (대소문자 무시 매칭) */
+const AGTECH_KEYWORDS = [
+  'farm', 'agri', 'agriculture', 'crop', 'smart farm', 'vertical farm',
+  'greenhouse', 'precision farming', 'harvest', 'irrigation', 'livestock',
+  'aquaculture', 'food tech', 'foodtech', 'agtech', 'seed', 'soil',
+  'food system', 'fertili', 'pest control', 'indoor farm', 'hydroponic',
+  'drone ag', 'robot farm', 'grain', 'rice', 'wheat', 'soy', 'palm oil',
+];
+
 /** 크롤링 재시도 횟수 */
 const CRAWL_RETRIES = 2;
 
@@ -125,7 +137,8 @@ async function processSource(source, browser) {
 
   // 2. 신규 기사만 추려내기
   const newItems = await filterNewArticles(rawItems);
-  console.log(`[NewsAgent] ${source.name}: ${newItems.length}/${rawItems.length} new`);
+  const skipped  = rawItems.length - newItems.length; // URL 중복 제외
+  console.log(`[NewsAgent] ${source.name}: ${rawItems.length} fetched, ${skipped} skipped (dup/age), ${newItems.length} new`);
   if (!newItems.length) return { created: 0, failed: 0 };
 
   // 3. 본문 크롤링 (내용 부족한 항목만)
@@ -169,6 +182,8 @@ async function fetchRssItems(source) {
   try {
     const feed = await rssParser.parseURL(feedUrl);
 
+    const cutoff = Date.now() - MAX_AGE_MS;
+
     return feed.items
       .filter((item) => item.link)
       .map((item) => {
@@ -184,12 +199,30 @@ async function fetchRssItems(source) {
           title:       item.title?.trim() || '',
           url:         item.link.trim(),
           content,
+          description: (item.contentSnippet || item.description || '').trim(),
           needsCrawl:  content.length < MIN_CONTENT_LENGTH,
           publishedAt: item.pubDate ? new Date(item.pubDate) : new Date(),
           sourceName:  source.name,
           sourceId:    source.id,
           language:    source.language || 'en',
         };
+      })
+      .filter((item) => {
+        // 72시간 나이 필터
+        const age = item.publishedAt.getTime();
+        if (process.env.SKIP_AGE_FILTER !== 'true' && !isNaN(age) && age < cutoff) {
+          console.log(`[NewsAgent] Skipped old: ${item.title}`);
+          return false;
+        }
+        // AgTech 키워드 필터 (영문 소스만, 한국 전문지는 bypass)
+        if (!isKoreaSource(source)) {
+          const text = `${item.title} ${item.description}`.toLowerCase();
+          if (!AGTECH_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()))) {
+            console.log(`[NewsAgent] Filtered (not agtech): ${item.title}`);
+            return false;
+          }
+        }
+        return true;
       });
   } catch (err) {
     console.error(`[NewsAgent] RSS parse failed "${source.name}":`, err.message);
@@ -326,24 +359,32 @@ async function processArticle(item, source) {
   const isKorean = source.language === 'ko';
   const opts     = { agentName: AGENT_NAME };
 
-  // EN→KO 번역 (영문 소스만)
-  const titleKo   = isKorean
+  // 제목 번역 (영문 소스만)
+  const titleKo = isKorean
     ? item.title
-    : await callQwen('translate_ko', PROMPTS.TRANSLATE_KO, truncate(item.title, 400), opts);
+    : await callQwen('translate_ko', PROMPTS.TRANSLATE_KO, truncate(item.title, 300), opts);
+
+  // 본문: 영문 → 한국어 심층 분석 아티클 생성, 한국어 소스는 원문 그대로
+  const stripHtml = (str) => (str || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
   const contentKo = isKorean
     ? item.content
-    : await callQwen('translate_ko', PROMPTS.TRANSLATE_KO, truncate(item.content, 2000), opts);
+    : await callQwen(
+        'analyze_ko',
+        PROMPTS.ANALYZE_KO,
+        `제목: ${item.title}\n\n${truncate(stripHtml(item.content), 2000)}`,
+        opts,
+      );
 
-  // 요약·태그·논평 (한국어 기준으로 처리)
+  // summary: contentKo 첫 2-3줄 추출 (별도 AI 호출 없음)
   const baseText = contentKo || item.content;
+  const summary  = extractSummary(baseText);
 
-  const summary    = await callQwen('summarize',  PROMPTS.SUMMARIZE_NEWS, truncate(baseText, 1500), opts);
   const tagsRaw    = await callQwen('tag_extract', PROMPTS.CLASSIFY_TAGS,  truncate(item.title + '\n' + baseText, 800), opts);
   const commentary = await callQwen('commentary',  PROMPTS.COMMENTARY,     truncate(baseText, 1000), opts);
 
   const tags = parseTags(tagsRaw);
-  const slug = generateSlug(titleKo || item.title, item.publishedAt);
+  const slug = await ensureUniqueSlug(generateSlug(titleKo || item.title, item.publishedAt));
 
   await saveArticle({
     sourceId:    source.id,
@@ -366,6 +407,16 @@ async function processArticle(item, source) {
 // ── 유틸 함수 ─────────────────────────────────────────────────────────
 
 /**
+ * 한국 농업 전문지 여부 (키워드 필터 bypass 대상)
+ * region='korea' AND language='ko' 인 소스
+ * @param {object} source - news_sources 레코드
+ * @returns {boolean}
+ */
+function isKoreaSource(source) {
+  return source.region === 'korea' && source.language === 'ko';
+}
+
+/**
  * 텍스트 길이 제한 (토큰 절약)
  * @param {string} text
  * @param {number} maxLen
@@ -373,6 +424,19 @@ async function processArticle(item, source) {
 function truncate(text, maxLen) {
   if (!text) return '';
   return text.length > maxLen ? text.substring(0, maxLen) + '...' : text;
+}
+
+/**
+ * 아티클 텍스트에서 첫 2-3줄을 추출하여 summary로 사용
+ * @param {string} text - 생성된 한국어 아티클 본문
+ * @returns {string}    - 최대 300자 요약
+ */
+function extractSummary(text) {
+  const lines = (text || '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  return lines.slice(0, 3).join(' ').substring(0, 300);
 }
 
 /**
@@ -417,6 +481,21 @@ function generateSlug(title, date = new Date()) {
 }
 
 /**
+ * articles 테이블에서 slug 중복 확인 후 고유 slug 반환
+ * 충돌 시 끝에 6자리 랜덤 접미사 추가
+ * 예: 'article-title-20260301' 충돌 → 'article-title-20260301-a3f2b1'
+ *
+ * @param {string} slug - generateSlug() 결과
+ * @returns {Promise<string>}
+ */
+async function ensureUniqueSlug(slug) {
+  const { rows } = await query('SELECT 1 FROM articles WHERE slug = $1', [slug]);
+  if (!rows.length) return slug;
+  const suffix = Math.random().toString(36).slice(2, 8);
+  return `${slug}-${suffix}`;
+}
+
+/**
  * articles 테이블 INSERT
  * ON CONFLICT (original_url) DO NOTHING → 중복 무시
  */
@@ -433,16 +512,16 @@ async function saveArticle({
        (source_id, source_name, slug,
         title_ko, title_en,
         content_ko, content_en,
-        summary, commentary,
+        summary, summary_ko, commentary,
         original_url, menu_type, tags,
         status, published_at)
      VALUES
        ($1,$2,$3,
         $4,$5,
         $6,$7,
-        $8,$9,
+        $8,$8,$9,
         $10,'news',$11,
-        'draft',$12)
+        'published',$12)
      ON CONFLICT (original_url) DO NOTHING`,
     [
       sourceId, sourceName, slug,
