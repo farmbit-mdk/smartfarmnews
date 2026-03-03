@@ -244,13 +244,18 @@ export default function HomePage() {
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader title="동남아 포커스" href="/news?region=sea" badge="SEA" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '20px',
+              alignItems: 'start',
+            }}
+          >
             {SEA_ARTICLES.slice(0, 4).map((article) => (
-              <ArticleCard
-                key={article.id}
-                {...article}
-                lang="ko"
-              />
+              <div key={article.id} style={{ minWidth: 0 }}>
+                <ArticleCard {...article} lang="ko" />
+              </div>
             ))}
           </div>
         </div>

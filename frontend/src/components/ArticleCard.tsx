@@ -44,7 +44,7 @@ export default function ArticleCard({
   const regionStyle = region ? (REGION_STYLE[region] ?? { label: region.toUpperCase(), color: '#9E9E9E' }) : null;
 
   return (
-    <Link href={href} className="group block">
+    <Link href={href} className="group" style={{ display: 'block' }}>
       <article
         className="h-full rounded-xl overflow-hidden transition-all duration-200"
         style={{
