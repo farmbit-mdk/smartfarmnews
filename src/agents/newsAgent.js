@@ -30,7 +30,7 @@ const AGENT_NAME = 'news';
 const MIN_CONTENT_LENGTH = 200;
 
 /** 수집 대상 최대 기사 나이 (72시간) */
-const MAX_AGE_MS = 72 * 60 * 60 * 1000;
+const MAX_AGE_MS = 168 * 60 * 60 * 1000; // 7일
 
 /** AgTech 관련 키워드 — 영문 소스 필터용 (대소문자 무시 매칭) */
 const AGTECH_KEYWORDS = [
