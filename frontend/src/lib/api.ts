@@ -2,11 +2,7 @@
  * SmartFarmNews API client
  *
  * 백엔드 GET /api/articles 엔드포인트를 호출한다.
- * 에러·오프라인 시 빈 배열/null 반환 → 호출부에서 MOCK_ARTICLES fallback 처리.
- *
- * NOTE: 백엔드 /api/articles/:id 는 숫자 ID 전용이므로
- *       fetchArticle(slug)는 목록을 받아 slug로 필터링한다.
- *       DB region 컬럼이 SELECT에 아직 포함되지 않아 region은 'global' 기본값.
+ * 에러·오프라인 시 빈 배열/null 반환 → 호출부에서 빈 상태 처리.
  */
 
 import { Article } from './mockData';
@@ -19,13 +15,14 @@ interface ApiRow {
   slug: string;
   title_ko: string;
   title_en?: string;
+  content_ko?: string;
   summary?: string;
   tags?: string[];
   source_name?: string;
   menu_type?: string;
   published_at?: string;
   view_count?: number;
-  region?: string; // DB 컬럼 존재하나 현재 SELECT에 미포함 → undefined
+  region?: string;
 }
 
 function normalize(row: ApiRow): Article {
@@ -34,6 +31,7 @@ function normalize(row: ApiRow): Article {
     slug:     row.slug,
     title:    row.title_ko || row.title_en || '',
     excerpt:  row.summary ?? '',
+    content:  row.content_ko ?? '',
     category: row.tags?.[0] ?? row.menu_type ?? '',
     region:   row.region ?? 'global',
     date:     row.published_at?.slice(0, 10) ?? '',

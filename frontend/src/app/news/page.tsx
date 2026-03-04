@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import ArticleCard from '@/src/components/ArticleCard';
-import { MOCK_ARTICLES, Article } from '@/src/lib/mockData';
+import { Article } from '@/src/lib/mockData';
 import { fetchArticles } from '@/src/lib/api';
-
-const ALL_MOCK = MOCK_ARTICLES;
 
 type RegionFilter = 'all' | 'korea' | 'sea' | 'global';
 
@@ -27,14 +25,15 @@ function matchRegion(articleRegion: string | undefined, filter: RegionFilter): b
 const PAGE_SIZE = 9;
 
 export default function NewsPage() {
-  const [articles, setArticles]       = useState<Article[]>(ALL_MOCK);
+  const [articles, setArticles]         = useState<Article[]>([]);
+  const [loading, setLoading]           = useState(true);
   const [activeRegion, setActiveRegion] = useState<RegionFilter>('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage]   = useState(1);
 
-  // 마운트 후 API에서 fetch, 성공 시 mock 대체
   useEffect(() => {
     fetchArticles({ menu_type: 'news', limit: 50 }).then((data) => {
-      if (data.length > 0) setArticles(data);
+      setArticles(data);
+      setLoading(false);
     });
   }, []);
 
@@ -83,7 +82,11 @@ export default function NewsPage() {
         </div>
 
         {/* ── 기사 그리드 ─────────────────────────────────────── */}
-        {paged.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center h-48">
+            <p className="text-sm" style={{ color: '#9E9E9E' }}>뉴스를 불러오는 중...</p>
+          </div>
+        ) : paged.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3">
             <p style={{ color: '#9E9E9E' }}>해당 지역의 기사가 없습니다.</p>
           </div>

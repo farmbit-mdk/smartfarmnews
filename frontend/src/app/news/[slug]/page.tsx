@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { MOCK_ARTICLES, Article } from '@/src/lib/mockData';
 import { fetchArticle, fetchArticles } from '@/src/lib/api';
 import ArticleCard from '@/src/components/ArticleCard';
 
@@ -21,24 +20,19 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function buildBodyParagraphs(article: Article): string[] {
-  return [
-    article.excerpt,
-    `전문가들은 이번 사례가 ${article.category} 분야 전반에 걸쳐 새로운 기준점을 제시할 것으로 보고 있다. 특히 데이터 기반 의사결정과 AI 통합이 가속화되면서 관련 시장의 성장세는 더욱 뚜렷해질 전망이다.`,
-    `업계 관계자는 "기술적 준비와 현지 파트너십 구축이 핵심"이라며, 단기 성과보다 생태계 전체의 지속가능성을 고려한 접근이 중요하다고 강조했다. 정책적 지원과 민간 투자가 맞물리는 시점이 주요 변곡점이 될 것으로 분석된다.`,
-    `향후 12개월간의 시장 흐름을 좌우할 변수로는 글로벌 공급망 안정화, 탄소 규제 강화, 그리고 스마트팜 인프라 보급 속도가 꼽힌다. SmartFarmNews는 관련 동향을 지속적으로 모니터링할 예정이다.`,
-  ];
+/** content_ko 텍스트를 단락 배열로 변환 */
+function parseContentParagraphs(content: string | undefined): string[] {
+  if (!content) return [];
+  return content
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
 }
 
 // ── generateStaticParams ──────────────────────────────────────────
-// 빌드 타임에 API + mock slug를 합쳐 정적 페이지 생성
 export async function generateStaticParams() {
-  const apiArticles = await fetchArticles({ limit: 100 });
-  const allSlugs = new Set([
-    ...apiArticles.map((a) => a.slug),
-    ...MOCK_ARTICLES.map((a) => a.slug),
-  ]);
-  return Array.from(allSlugs).map((slug) => ({ slug }));
+  const articles = await fetchArticles({ limit: 100 });
+  return articles.map((a) => ({ slug: a.slug }));
 }
 
 // ── generateMetadata ──────────────────────────────────────────────
@@ -48,8 +42,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article =
-    (await fetchArticle(slug)) ?? MOCK_ARTICLES.find((a) => a.slug === slug);
+  const article  = await fetchArticle(slug);
 
   if (!article) {
     return { title: '기사를 찾을 수 없습니다 | SmartFarmNews' };
@@ -66,28 +59,23 @@ export default async function NewsDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-
-  // 1. API에서 단건 조회, 실패 시 mock fallback
-  const apiArticle = await fetchArticle(slug);
-  const article    = apiArticle ?? MOCK_ARTICLES.find((a) => a.slug === slug) ?? null;
+  const { slug }  = await params;
+  const article   = await fetchArticle(slug);
   if (!article) notFound();
 
-  // 2. 이전/다음/관련 기사 목록 (API 우선, 실패 시 mock)
-  const apiList = await fetchArticles({ limit: 100 });
-  const source  = apiList.length > 0 ? apiList : MOCK_ARTICLES;
+  // 이전/다음/관련 기사 목록
+  const list       = await fetchArticles({ limit: 100 });
+  const index      = list.findIndex((a) => a.slug === slug);
+  const prevArticle = index > 0               ? list[index - 1] : null;
+  const nextArticle = index < list.length - 1 ? list[index + 1] : null;
 
-  const index      = source.findIndex((a) => a.slug === slug);
-  const prevArticle = index > 0                  ? source[index - 1] : null;
-  const nextArticle = index < source.length - 1  ? source[index + 1] : null;
-
-  const related = source
-    .filter((a) => a.slug !== slug && a.category === article!.category)
+  const related = list
+    .filter((a) => a.slug !== slug && a.category === article.category)
     .slice(0, 3);
 
-  const paragraphs  = buildBodyParagraphs(article!);
-  const regionStyle = REGION_STYLE[article!.region] ?? {
-    label: article!.region.toUpperCase(),
+  const paragraphs  = parseContentParagraphs(article.content);
+  const regionStyle = REGION_STYLE[article.region] ?? {
+    label: article.region.toUpperCase(),
     color: '#9E9E9E',
   };
 
@@ -121,7 +109,7 @@ export default async function NewsDetailPage({
                 className="px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wide"
                 style={{ backgroundColor: '#0891B2', color: '#FFFFFF' }}
               >
-                {article!.category}
+                {article.category}
               </span>
               <span
                 className="px-2.5 py-1 rounded text-xs font-semibold"
@@ -134,26 +122,32 @@ export default async function NewsDetailPage({
                 {regionStyle.label}
               </span>
               <span className="text-xs ml-auto" style={{ color: '#9E9E9E' }}>
-                {formatDate(article!.date)}
+                {formatDate(article.date)}
               </span>
             </div>
 
             {/* 제목 */}
             <h1 className="text-3xl font-bold text-white leading-snug mb-8">
-              {article!.title}
+              {article.title}
             </h1>
 
             {/* 구분선 */}
             <div className="mb-8" style={{ borderTop: '1px solid #333333' }} />
 
             {/* 본문 단락 */}
-            <div className="space-y-5">
-              {paragraphs.map((para, i) => (
-                <p key={i} className="leading-relaxed text-base" style={{ color: '#CCCCCC' }}>
-                  {para}
-                </p>
-              ))}
-            </div>
+            {paragraphs.length > 0 ? (
+              <div className="space-y-5">
+                {paragraphs.map((para, i) => (
+                  <p key={i} className="leading-relaxed text-base" style={{ color: '#CCCCCC' }}>
+                    {para}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p className="leading-relaxed text-base" style={{ color: '#CCCCCC' }}>
+                {article.excerpt}
+              </p>
+            )}
 
             {/* 구분선 */}
             <div className="my-10" style={{ borderTop: '1px solid #333333' }} />

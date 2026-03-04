@@ -1,7 +1,6 @@
 import ArticleCard from '@/src/components/ArticleCard';
 import Link from 'next/link';
 import { fetchArticles } from '@/src/lib/api';
-import { MOCK_ARTICLES } from '@/src/lib/mockData';
 
 const SEA_REGIONS = ['sea', 'vietnam', 'indonesia', 'thailand'];
 
@@ -43,15 +42,15 @@ function SectionHeader({ title, href, badge }: { title: string; href?: string; b
 }
 
 export default async function HomePage() {
-  // API fetch → 실패/오프라인이면 빈 배열 반환
-  const apiArticles = await fetchArticles({ menu_type: 'news', limit: 20 });
-  const articles    = apiArticles.length > 0 ? apiArticles : MOCK_ARTICLES;
+  const articles = await fetchArticles({ menu_type: 'news', limit: 20 });
 
-  const featured     = articles[0];
+  const featured     = articles[0] ?? null;
   const newsArticles = articles.slice(0, 6);
   const seaArticles  = articles.filter((a) => SEA_REGIONS.includes(a.region)).slice(0, 4);
 
-  const featuredRegionStyle = REGION_STYLE[featured.region] ?? { label: featured.region.toUpperCase(), color: '#9E9E9E' };
+  const featuredRegionStyle = featured
+    ? (REGION_STYLE[featured.region] ?? { label: featured.region.toUpperCase(), color: '#9E9E9E' })
+    : { label: '', color: '#9E9E9E' };
 
   return (
     <div style={{ backgroundColor: '#1A1A1A' }}>
@@ -112,6 +111,7 @@ export default async function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#0891B2' }}>
                 오늘의 주요 뉴스
               </p>
+              {featured ? (
               <div
                 className="rounded-2xl p-5 space-y-4"
                 style={{ backgroundColor: '#242424', border: '1px solid #333333' }}
@@ -151,6 +151,14 @@ export default async function HomePage() {
                   </svg>
                 </Link>
               </div>
+              ) : (
+              <div
+                className="rounded-2xl p-5 flex items-center justify-center"
+                style={{ backgroundColor: '#242424', border: '1px solid #333333', minHeight: '160px' }}
+              >
+                <p className="text-sm" style={{ color: '#9E9E9E' }}>기사를 불러오는 중입니다.</p>
+              </div>
+              )}
 
               {/* 플랫폼 통계 요약 */}
               <div className="grid grid-cols-3 gap-3 mt-4">
