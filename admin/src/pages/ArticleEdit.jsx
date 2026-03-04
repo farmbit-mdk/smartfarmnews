@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getArticle, updateArticle, publishArticle } from '../lib/api';
+import {
+  getArticle, updateArticle, publishArticle,
+  uploadArticleImage, regenerateArticleImage, deleteArticleImage,
+} from '../lib/api';
 
 export default function ArticleEdit() {
   const { id } = useParams();
@@ -11,6 +14,10 @@ export default function ArticleEdit() {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState('');
+  const [imageUrl, setImageUrl] = useState(null);
+  const [imageStatus, setImageStatus] = useState(''); // 이미지 작업 메시지
+  const [imgLoading, setImgLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     getArticle(id)
@@ -26,6 +33,7 @@ export default function ArticleEdit() {
           seo_title: data.seo_title ?? '',
           seo_description: data.seo_description ?? '',
         });
+        setImageUrl(data.image_url ?? null);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -61,6 +69,53 @@ export default function ArticleEdit() {
       setMessage(err.response?.data?.error ?? '발행 실패');
     } finally {
       setPublishing(false);
+    }
+  }
+
+  async function handleImageUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImgLoading(true);
+    setImageStatus('');
+    try {
+      const { data } = await uploadArticleImage(id, file);
+      setImageUrl(data.image_url);
+      setImageStatus('이미지가 업로드되었습니다.');
+    } catch {
+      setImageStatus('업로드 실패');
+    } finally {
+      setImgLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  async function handleImageRegenerate() {
+    if (!confirm('AI로 이미지를 재생성하시겠습니까? (수십 초 소요)')) return;
+    setImgLoading(true);
+    setImageStatus('AI 이미지 생성 중...');
+    try {
+      const { data } = await regenerateArticleImage(id);
+      setImageUrl(data.image_url);
+      setImageStatus('AI 이미지가 생성되었습니다.');
+    } catch {
+      setImageStatus('생성 실패');
+    } finally {
+      setImgLoading(false);
+    }
+  }
+
+  async function handleImageDelete() {
+    if (!confirm('이미지를 삭제하시겠습니까?')) return;
+    setImgLoading(true);
+    setImageStatus('');
+    try {
+      await deleteArticleImage(id);
+      setImageUrl(null);
+      setImageStatus('이미지가 삭제되었습니다.');
+    } catch {
+      setImageStatus('삭제 실패');
+    } finally {
+      setImgLoading(false);
     }
   }
 
@@ -122,6 +177,74 @@ export default function ArticleEdit() {
           {message}
         </div>
       )}
+
+      {/* ── 이미지 관리 패널 ─────────────────────────────────── */}
+      <div className="bg-white rounded-lg border border-gray-200 p-5">
+        <h3 className="text-sm font-semibold text-gray-700 mb-4">기사 이미지</h3>
+        <div className="flex flex-col sm:flex-row gap-5 items-start">
+
+          {/* 미리보기 */}
+          <div
+            className="flex-shrink-0 rounded-lg overflow-hidden flex items-center justify-center bg-gray-100"
+            style={{ width: 220, height: 140 }}
+          >
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="기사 이미지"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-xs text-gray-400">이미지 없음</span>
+            )}
+          </div>
+
+          {/* 버튼 그룹 */}
+          <div className="flex flex-col gap-2">
+            {/* 파일 업로드 */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={imgLoading}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              파일 업로드
+            </button>
+
+            {/* AI 재생성 */}
+            <button
+              onClick={handleImageRegenerate}
+              disabled={imgLoading}
+              className="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50"
+            >
+              {imgLoading ? '처리 중...' : 'AI 재생성'}
+            </button>
+
+            {/* 삭제 */}
+            {imageUrl && (
+              <button
+                onClick={handleImageDelete}
+                disabled={imgLoading}
+                className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+              >
+                이미지 삭제
+              </button>
+            )}
+
+            {imageStatus && (
+              <p className={`text-xs mt-1 ${imageStatus.includes('실패') ? 'text-red-500' : 'text-green-600'}`}>
+                {imageStatus}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Form */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">

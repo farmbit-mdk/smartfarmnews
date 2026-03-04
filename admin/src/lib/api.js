@@ -45,6 +45,24 @@ export const publishArticle = (id) => api.patch(`/articles/${id}/publish`);
 export const archiveArticle = (id) => api.patch(`/articles/${id}/archive`);
 export const deleteArticle = (id) => api.delete(`/articles/${id}`);
 
+// ── Article Images ────────────────────────────────────────────────
+export const getArticleImage = (id) =>
+  api.get(`/articles/${id}/image`);
+
+export const uploadArticleImage = (id, file) => {
+  const form = new FormData();
+  form.append('image', file);
+  return api.post(`/articles/${id}/image`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const regenerateArticleImage = (id) =>
+  api.put(`/articles/${id}/image/regenerate`);
+
+export const deleteArticleImage = (id) =>
+  api.delete(`/articles/${id}/image`);
+
 // ── Equipment ─────────────────────────────────────────────────────
 export const getEquipment = (params) => api.get('/equipment', { params });
 export const updateEquipment = (id, data) => api.put(`/equipment/${id}`, data);

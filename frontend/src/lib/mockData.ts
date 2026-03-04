@@ -2,7 +2,8 @@ export interface Article {
   id: number;
   title: string;
   excerpt: string;
-  content?: string;  // 기사 본문 (content_ko)
+  content?: string;   // 기사 본문 (content_ko)
+  imageUrl?: string;  // 기사 이미지 URL
   category: string;
   region: string;
   date: string;

@@ -1,22 +1,45 @@
 /**
  * Admin Articles API (JWT 필요)
  * GET    /api/admin/articles
+ * GET    /api/admin/articles/:id
  * POST   /api/admin/articles
  * PUT    /api/admin/articles/:id
  * PATCH  /api/admin/articles/:id/publish
  * PATCH  /api/admin/articles/:id/archive
  * DELETE /api/admin/articles/:id
+ *
+ * 이미지 관리:
+ * GET    /api/admin/articles/:id/image
+ * POST   /api/admin/articles/:id/image        (multipart/form-data, field: image)
+ * PUT    /api/admin/articles/:id/image/regenerate
+ * DELETE /api/admin/articles/:id/image
  */
 
-import { Router } from 'express';
-import { query }  from '../../../config/database.js';
+import { Router }  from 'express';
+import multer      from 'multer';
+import fs          from 'fs/promises';
+import path        from 'path';
+import { query }   from '../../../config/database.js';
 import { adminAuth } from '../../middleware/adminAuth.js';
+import { generateArticleImage } from '../../../utils/imageGenerator.js';
+
+const IMAGE_DIR = '/var/www/smartfarmnews/public/images';
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits:  { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (_req, file, cb) => {
+    if (/^image\//.test(file.mimetype)) cb(null, true);
+    else cb(Object.assign(new Error('Image files only'), { status: 400 }));
+  },
+});
 
 const router = Router();
 router.use(adminAuth);
 
 // ── 목록 ──────────────────────────────────────────────────────────
 router.get('/', async (req, res, next) => {
+
   try {
     const { status, menu_type, page = 1, limit = 20 } = req.query;
     const conditions = [];
@@ -155,6 +178,112 @@ router.patch('/:id/archive', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     await query('DELETE FROM articles WHERE id = $1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── 단건 조회 ─────────────────────────────────────────────────────
+router.get('/:id', async (req, res, next) => {
+  try {
+    const { rows } = await query(
+      `SELECT * FROM articles WHERE id = $1`,
+      [req.params.id],
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not Found' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── 이미지: 현재 URL 조회 ─────────────────────────────────────────
+router.get('/:id/image', async (req, res, next) => {
+  try {
+    const { rows } = await query(
+      'SELECT id, image_url FROM articles WHERE id = $1',
+      [req.params.id],
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not Found' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── 이미지: 파일 업로드 ───────────────────────────────────────────
+router.post('/:id/image', upload.single('image'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+
+    const { rows } = await query(
+      'SELECT slug FROM articles WHERE id = $1',
+      [req.params.id],
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not Found' });
+
+    const { slug } = rows[0];
+    await fs.mkdir(IMAGE_DIR, { recursive: true });
+
+    const filePath = path.join(IMAGE_DIR, `${slug}.jpg`);
+    await fs.writeFile(filePath, req.file.buffer);
+
+    const imageUrl = `/images/${slug}.jpg`;
+    await query(
+      'UPDATE articles SET image_url = $1 WHERE id = $2',
+      [imageUrl, req.params.id],
+    );
+
+    console.log(`[ImageAdmin] Uploaded: ${slug}.jpg`);
+    res.json({ image_url: imageUrl });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── 이미지: AI 재생성 ─────────────────────────────────────────────
+router.put('/:id/image/regenerate', async (req, res, next) => {
+  try {
+    const { rows } = await query(
+      'SELECT slug, tags, title_en FROM articles WHERE id = $1',
+      [req.params.id],
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not Found' });
+
+    const { slug, tags, title_en } = rows[0];
+    const imageUrl = await generateArticleImage(slug, tags, title_en);
+
+    if (!imageUrl) return res.status(500).json({ error: 'Image generation failed' });
+
+    await query(
+      'UPDATE articles SET image_url = $1 WHERE id = $2',
+      [imageUrl, req.params.id],
+    );
+
+    res.json({ image_url: imageUrl });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── 이미지: 삭제 ──────────────────────────────────────────────────
+router.delete('/:id/image', async (req, res, next) => {
+  try {
+    const { rows } = await query(
+      'SELECT image_url FROM articles WHERE id = $1',
+      [req.params.id],
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not Found' });
+
+    const imageUrl = rows[0].image_url;
+    if (imageUrl) {
+      const filePath = path.join('/var/www/smartfarmnews/public', imageUrl);
+      await fs.rm(filePath, { force: true });
+      console.log(`[ImageAdmin] Deleted: ${path.basename(filePath)}`);
+    }
+
+    await query('UPDATE articles SET image_url = NULL WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
     next(err);

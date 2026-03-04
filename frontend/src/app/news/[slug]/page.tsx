@@ -131,6 +131,19 @@ export default async function NewsDetailPage({
               {article.title}
             </h1>
 
+            {/* 히어로 이미지 */}
+            {article.imageUrl && (
+              <div className="mb-8 rounded-xl overflow-hidden" style={{ maxHeight: '420px' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={article.imageUrl}
+                  alt={article.title}
+                  className="w-full object-cover"
+                  style={{ maxHeight: '420px' }}
+                />
+              </div>
+            )}
+
             {/* 구분선 */}
             <div className="mb-8" style={{ borderTop: '1px solid #333333' }} />
 

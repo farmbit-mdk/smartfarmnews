@@ -23,6 +23,7 @@ interface ApiRow {
   published_at?: string;
   view_count?: number;
   region?: string;
+  image_url?: string;
 }
 
 function normalize(row: ApiRow): Article {
@@ -32,6 +33,7 @@ function normalize(row: ApiRow): Article {
     title:    row.title_ko || row.title_en || '',
     excerpt:  row.summary ?? '',
     content:  row.content_ko ?? '',
+    imageUrl: row.image_url ? `${BASE}${row.image_url}` : undefined,
     category: row.tags?.[0] ?? row.menu_type ?? '',
     region:   row.region ?? 'global',
     date:     row.published_at?.slice(0, 10) ?? '',

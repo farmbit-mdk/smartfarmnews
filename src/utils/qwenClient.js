@@ -45,6 +45,7 @@ const TASK_MODEL_MAP = {
 
   // Pro tier (현재 FREE 모델과 동일 — 고품질 모델로 교체 시 .env만 수정)
   analyze_ko:     QWEN_MODELS.GEMINI_FLASH,  // 심층 분석 아티클 — Gemini 2.5 Flash
+  image_prompt:   QWEN_MODELS.GEMINI_FLASH,  // 이미지 생성 프롬프트 작성
   commentary:     QWEN_MODELS.PRO,
   translate_zh:   QWEN_MODELS.PRO,
   translate_vi:   QWEN_MODELS.PRO,
@@ -67,6 +68,7 @@ const TASK_CONFIG = {
   tag_extract:     { maxTokens: 60,   temperature: 0.0 },
   parse_data:      { maxTokens: 300,  temperature: 0.0 },
   parse_auction:   { maxTokens: 300,  temperature: 0.0 },
+  image_prompt:    { maxTokens: 120,  temperature: 0.4 },
   commentary:      { maxTokens: 120,  temperature: 0.5 },
   translate_zh:    { maxTokens: 600,  temperature: 0.1 },
   translate_vi:    { maxTokens: 600,  temperature: 0.1 },

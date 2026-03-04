@@ -20,6 +20,7 @@ import { chromium } from 'playwright';
 
 import { callQwen, processSequentially } from '../utils/qwenClient.js';
 import { PROMPTS } from '../utils/qwenPrompts.js';
+import { generateArticleImage } from '../utils/imageGenerator.js';
 import { query } from '../config/database.js';
 
 // ── 상수 ────────────────────────────────────────────────────────────
@@ -392,12 +393,14 @@ async function processArticle(item, source) {
     ? 'korea'
     : source.region === 'sea' ? 'sea' : 'global';
 
+  const titleEn = isKorean ? '' : item.title;
+
   await saveArticle({
     sourceId:    source.id,
     sourceName:  source.name,
     slug,
-    titleKo:     titleKo   || item.title,
-    titleEn:     isKorean ? '' : item.title,
+    titleKo:     titleKo || item.title,
+    titleEn,
     contentKo,
     contentEn:   isKorean ? '' : truncate(item.content, 5000),
     summary,
@@ -407,6 +410,12 @@ async function processArticle(item, source) {
     region,
     publishedAt: item.publishedAt,
   });
+
+  // 이미지 생성 (실패해도 기사 저장 유지)
+  const imageUrl = await generateArticleImage(slug, tags, titleEn || titleKo || item.title);
+  if (imageUrl) {
+    await query('UPDATE articles SET image_url = $1 WHERE slug = $2', [imageUrl, slug]);
+  }
 
   console.log(`[NewsAgent] ✓ ${(titleKo || item.title).substring(0, 50)}`);
 }
