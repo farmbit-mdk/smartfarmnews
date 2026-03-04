@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import { fetchArticle, fetchArticles } from '@/src/lib/api';
 import ArticleCard from '@/src/components/ArticleCard';
 
+export const dynamic = 'force-dynamic';
+
 // ── 지역 스타일 ────────────────────────────────────────────────────
 const REGION_STYLE: Record<string, { label: string; color: string }> = {
   sea:       { label: 'SEA',    color: '#22D3EE' },
@@ -27,12 +29,6 @@ function parseContentParagraphs(content: string | undefined): string[] {
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
-}
-
-// ── generateStaticParams ──────────────────────────────────────────
-export async function generateStaticParams() {
-  const articles = await fetchArticles({ limit: 100 });
-  return articles.map((a) => ({ slug: a.slug }));
 }
 
 // ── generateMetadata ──────────────────────────────────────────────
