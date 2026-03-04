@@ -366,15 +366,18 @@ async function processArticle(item, source) {
 
   // 본문: 영문 → 한국어 심층 분석 아티클 생성, 한국어 소스는 원문 그대로
   const stripHtml = (str) => (str || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const analyzeInput = `제목: ${item.title}\n\n${truncate(stripHtml(item.content), 2000)}`;
 
-  const contentKo = isKorean
+  let contentKo = isKorean
     ? item.content
-    : await callQwen(
-        'analyze_ko',
-        PROMPTS.ANALYZE_KO,
-        `제목: ${item.title}\n\n${truncate(stripHtml(item.content), 2000)}`,
-        opts,
-      );
+    : await callQwen('analyze_ko', PROMPTS.ANALYZE_KO, analyzeInput, opts);
+
+  // 언어 감지: 영문 비율 70% 이상이면 1회 재시도
+  if (!isKorean && isMainlyLatin(contentKo)) {
+    console.warn(`[NewsAgent] Non-Korean output detected, retrying analyze_ko: ${item.title.substring(0, 50)}`);
+    const retry = await callQwen('analyze_ko', PROMPTS.ANALYZE_KO, analyzeInput, opts);
+    if (/[가-힣]/.test(retry)) contentKo = retry;
+  }
 
   // summary: contentKo 첫 2-3줄 추출 (별도 AI 호출 없음)
   const baseText = contentKo || item.content;
@@ -428,6 +431,19 @@ function isKoreaSource(source) {
 function truncate(text, maxLen) {
   if (!text) return '';
   return text.length > maxLen ? text.substring(0, maxLen) + '...' : text;
+}
+
+/**
+ * 텍스트의 Latin 문자 비율이 70% 이상이면 true (한국어 생성 실패 판정)
+ * @param {string} text
+ * @returns {boolean}
+ */
+function isMainlyLatin(text) {
+  if (!text) return true;
+  const letters = text.match(/[a-zA-Z가-힣]/g) ?? [];
+  if (letters.length === 0) return true;
+  const latinCount = text.match(/[a-zA-Z]/g)?.length ?? 0;
+  return latinCount / letters.length >= 0.7;
 }
 
 /**
