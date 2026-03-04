@@ -4,7 +4,7 @@
  *
  * 파이프라인:
  *   1. Gemini Flash → 기사 태그/제목 기반 이미지 프롬프트 생성
- *   2. FLUX.2 Schnell (OpenRouter) → 이미지 생성 → base64
+ *   2. FLUX.2 Pro (OpenRouter) → 이미지 생성 → base64
  *   3. 로컬 파일 저장: /var/www/smartfarmnews/public/images/{slug}.jpg
  *
  * 반환: '/images/{slug}.jpg' (성공) | null (실패)
@@ -16,7 +16,7 @@ import { config }    from '../config/env.js';
 import { callQwen }  from './qwenClient.js';
 
 const IMAGE_DIR  = '/var/www/smartfarmnews/public/images';
-const FLUX_MODEL = 'black-forest-labs/flux-2-schnell';
+const FLUX_MODEL = 'black-forest-labs/flux.2-pro';
 
 // ── 프롬프트 생성 시스템 메시지 ───────────────────────────────────────
 const IMAGE_PROMPT_SYSTEM = `You are an AI image prompt engineer specializing in agricultural photography.
@@ -40,7 +40,7 @@ async function buildImagePrompt(tags, titleEn) {
   );
 }
 
-// ── OpenRouter FLUX.2 이미지 생성 → base64 추출 ─────────────────────
+// ── OpenRouter FLUX.2 Pro 이미지 생성 → base64 추출 ─────────────────
 async function callFlux(prompt) {
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method:  'POST',
@@ -62,24 +62,15 @@ async function callFlux(prompt) {
     throw new Error(`FLUX API error ${res.status}: ${err.substring(0, 200)}`);
   }
 
-  const json    = await res.json();
-  const content = json.choices?.[0]?.message?.content;
+  const json   = await res.json();
+  const images = json.choices?.[0]?.message?.images;
 
-  // content가 배열인 경우 (multimodal 응답)
-  if (Array.isArray(content)) {
-    for (const part of content) {
-      if (part.type === 'image_url') {
-        const url = part.image_url?.url ?? '';
-        if (url.startsWith('data:')) return url.split(',')[1];  // data URL → base64
-        if (url.startsWith('http'))  return await fetchImageAsBase64(url);
-      }
+  // images 배열에서 첫 번째 base64 추출 (data:image/png;base64,... 형식)
+  if (Array.isArray(images) && images.length > 0) {
+    const dataUrl = images[0];
+    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:')) {
+      return dataUrl.split(',')[1]; // base64 부분만 반환
     }
-  }
-
-  // content가 문자열인 경우
-  if (typeof content === 'string') {
-    if (content.startsWith('data:')) return content.split(',')[1];
-    if (content.startsWith('http'))  return await fetchImageAsBase64(content);
   }
 
   throw new Error('No image data found in FLUX response');
