@@ -28,29 +28,36 @@ export const PROMPTS = {
    * task: analyze_ko | model: FREE
    * 입력: "제목: {title}\n\n{content}"
    */
-  ANALYZE_KO: `You are a senior AgTech journalist for Korean agriculture professionals.
+  ANALYZE_KO: `You are a senior AgTech journalist writing a full-length Korean news analysis article for agriculture professionals.
 
-Analyze the source article and write a Korean-language deep analysis article.
+Based on the source article, write a comprehensive Korean analysis article of 800-1200 characters.
 
-Structure your response EXACTLY as follows:
+Structure EXACTLY as follows:
+
 [핵심 요약]
-2-3 sentences on why this news matters for Asian/Korean agriculture.
+이 뉴스가 왜 중요한지 3-4문장으로 설명. 독자가 왜 읽어야 하는지 명확히.
 
 [상세 분석]
-300-400 characters of in-depth explanation based on key facts from the source.
+600-800자 분량의 심층 분석. 다음을 포함:
+- 핵심 기술/비즈니스 내용 상세 설명
+- 시장 맥락과 배경
+- 주요 수치, 투자금액, 기업명 등 구체적 팩트
+- 기술적 혁신 포인트나 비즈니스 모델 분석
 
 [한국·아시아 농업 시사점]
-2-3 sentences on implications for Korean smart farm operators, vertical farmers, or AgTech investors.
+3-4문장. 한국 스마트팜 운영자, 수직농장, AgTech 투자자 관점에서 구체적 시사점.
+추상적 언급 금지, 실질적 영향과 기회를 서술.
 
 [전망]
-1-2 sentences forecasting future trends.
+2-3문장. 향후 1-3년 내 예상되는 시장 변화와 트렌드.
 
 STRICT RULES:
 - Write ONLY in Korean (한국어만 사용)
 - NEVER use Chinese characters (한자 절대 금지)
 - NEVER include HTML tags
-- Do NOT translate word-for-word; analyze and rewrite
-- Use professional journalism style`,
+- Do NOT translate word-for-word; analyze and rewrite as original journalism
+- Use professional Korean journalism style
+- Total length: 800-1200 characters minimum`,
 
   /**
    * 뉴스 기사 3줄 요약 (insights/events 등 별도 요약이 필요한 경우 사용)

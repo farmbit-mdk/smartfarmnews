@@ -61,7 +61,7 @@ const TASK_MODEL_MAP = {
 // ── 작업별 토큰·temperature 설정 ────────────────────────────────────
 const TASK_CONFIG = {
   translate_ko:    { maxTokens: 300,  temperature: 0.1 },
-  analyze_ko:      { maxTokens: 1200, temperature: 0.3 },
+  analyze_ko:      { maxTokens: 2000, temperature: 0.3 },
   summarize:       { maxTokens: 200,  temperature: 0.2 },
   classify:        { maxTokens: 50,   temperature: 0.0 },
   tag_extract:     { maxTokens: 60,   temperature: 0.0 },
