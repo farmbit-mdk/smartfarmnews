@@ -134,17 +134,24 @@ export default async function NewsDetailPage({
             {/* 구분선 */}
             <div className="mb-8" style={{ borderTop: '1px solid #333333' }} />
 
-            {/* 본문 단락 */}
+            {/* 본문 단락 — fontSize 16px 고정 (상위 heading 스타일 override) */}
             {paragraphs.length > 0 ? (
               <div className="space-y-5">
                 {paragraphs.map((para, i) => (
-                  <p key={i} className="leading-relaxed text-base" style={{ color: '#CCCCCC' }}>
+                  <p
+                    key={i}
+                    className="leading-relaxed"
+                    style={{ color: '#CCCCCC', fontSize: '16px', fontWeight: 400 }}
+                  >
                     {para}
                   </p>
                 ))}
               </div>
             ) : (
-              <p className="leading-relaxed text-base" style={{ color: '#CCCCCC' }}>
+              <p
+                className="leading-relaxed"
+                style={{ color: '#CCCCCC', fontSize: '16px', fontWeight: 400 }}
+              >
                 {article.excerpt}
               </p>
             )}

@@ -16,10 +16,15 @@ const REGION_TABS: { key: RegionFilter; label: string }[] = [
 
 const SEA_REGIONS = ['sea', 'vietnam', 'indonesia', 'thailand'];
 
+function normalizeRegion(region: string | undefined): string {
+  return region || 'global';
+}
+
 function matchRegion(articleRegion: string | undefined, filter: RegionFilter): boolean {
   if (filter === 'all') return true;
-  if (filter === 'sea') return SEA_REGIONS.includes(articleRegion ?? '');
-  return articleRegion === filter;
+  const region = normalizeRegion(articleRegion);
+  if (filter === 'sea') return SEA_REGIONS.includes(region);
+  return region === filter;
 }
 
 const PAGE_SIZE = 9;
@@ -31,7 +36,7 @@ export default function NewsPage() {
   const [currentPage, setCurrentPage]   = useState(1);
 
   useEffect(() => {
-    fetchArticles({ menu_type: 'news', limit: 50 }).then((data) => {
+    fetchArticles({ menu_type: 'news', limit: 100 }).then((data) => {
       setArticles(data);
       setLoading(false);
     });

@@ -383,8 +383,11 @@ async function processArticle(item, source) {
   const tagsRaw    = await callQwen('tag_extract', PROMPTS.CLASSIFY_TAGS,  truncate(item.title + '\n' + baseText, 800), opts);
   const commentary = await callQwen('commentary',  PROMPTS.COMMENTARY,     truncate(baseText, 1000), opts);
 
-  const tags = parseTags(tagsRaw);
-  const slug = await ensureUniqueSlug(generateSlug(titleKo || item.title, item.publishedAt));
+  const tags   = parseTags(tagsRaw);
+  const slug   = await ensureUniqueSlug(generateSlug(titleKo || item.title, item.publishedAt));
+  const region = isKorean
+    ? 'korea'
+    : source.region === 'sea' ? 'sea' : 'global';
 
   await saveArticle({
     sourceId:    source.id,
@@ -398,6 +401,7 @@ async function processArticle(item, source) {
     commentary,
     originalUrl: item.url,
     tags,
+    region,
     publishedAt: item.publishedAt,
   });
 
@@ -505,6 +509,7 @@ async function saveArticle({
   contentKo, contentEn,
   summary, commentary,
   originalUrl, tags,
+  region,
   publishedAt,
 }) {
   await query(
@@ -514,14 +519,14 @@ async function saveArticle({
         content_ko, content_en,
         summary, summary_ko, commentary,
         original_url, menu_type, tags,
-        status, published_at)
+        region, status, published_at)
      VALUES
        ($1,$2,$3,
         $4,$5,
         $6,$7,
         $8,$8,$9,
         $10,'news',$11,
-        'published',$12)
+        $12,'published',$13)
      ON CONFLICT (original_url) DO NOTHING`,
     [
       sourceId, sourceName, slug,
@@ -529,6 +534,7 @@ async function saveArticle({
       contentKo, contentEn,
       summary, commentary,
       originalUrl, tags,
+      region,
       publishedAt,
     ],
   );
